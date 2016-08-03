@@ -6,7 +6,7 @@ import android.os.Looper;
 import test.com.cleancodesample.domain.executor.MainExecutor;
 
 /**
- * Created by hzaied on 7/16/16.
+ * The implementation of the UI executor using Android Handler
  */
 public class MainExecutorImpl implements MainExecutor {
     private static MainExecutorImpl sMainExecutor = new MainExecutorImpl();

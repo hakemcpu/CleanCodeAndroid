@@ -22,8 +22,15 @@ import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
 
+import javax.inject.Inject;
+
+import test.com.cleancodesample.AndroidApplication;
 import test.com.cleancodesample.R;
-import test.com.cleancodesample.data.PhotoRepositoryWrapper;
+import test.com.cleancodesample.dagger.component.ApplicationComponent;
+import test.com.cleancodesample.dagger.component.DaggerApplicationComponent;
+import test.com.cleancodesample.dagger.component.DaggerPhotoComponent;
+import test.com.cleancodesample.dagger.component.PhotoComponent;
+import test.com.cleancodesample.data.PhotoRepositoryImpl;
 import test.com.cleancodesample.data.network.RemotePhotoRepositoryImpl;
 import test.com.cleancodesample.data.network.imageloader.ThreadPoolImageLoader;
 import test.com.cleancodesample.data.storage.LocalPhotoRepositoryImpl;
@@ -42,7 +49,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     private ImageAdapter mAdapter;
     private ThreadPoolImageLoader<ViewHolder> mImageLoader;
 
-    private MainPresenter mMainPresenter;
+    // This has to be public for Dagger to be able to inject it.
+    public @Inject MainPresenterImpl mMainPresenter;
+
+    private PhotoComponent mPhotoComponent;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -67,15 +77,23 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
         setRetainInstance(true);
 
-        mMainPresenter = new MainPresenterImpl(MainExecutorImpl.getInstance(), ThreadExecutorImpl.getInstance(),
-                new PhotoRepositoryWrapper(new LocalPhotoRepositoryImpl(getContext()), new RemotePhotoRepositoryImpl()),
-                this);
+        // Initialize the dagger injector.
+        ApplicationComponent applicationComponent =
+                ((AndroidApplication)getActivity().getApplication()).getApplicationComponent();
+        // In this application we can either inject using the PhotoComponent or the ApplicationComponent
+        // applicationComponent.inject(this);
+        mPhotoComponent = DaggerPhotoComponent.builder().applicationComponent(applicationComponent).build();
+        mPhotoComponent.inject(this);
+
+        // Set the callback of the view.
+        mMainPresenter.setView(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mImageLoader.clearQueue();
+        mPhotoComponent = null; // Clean the component since it's scope is @PerFragment
     }
 
     @Nullable
@@ -105,6 +123,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(QUERY_LOADER_ID, null, this);
+        mMainPresenter.getPhotos();
     }
 
     @Override

@@ -2,9 +2,13 @@ package test.com.cleancodesample.data.storage;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import test.com.cleancodesample.data.storage.converter.StorageModelConverter;
 import test.com.cleancodesample.data.storage.model.PhotosContract;
@@ -18,13 +22,18 @@ public class LocalPhotoRepositoryImpl implements PhotoRepository {
 
     private Context mContext;
 
-    public LocalPhotoRepositoryImpl(Context context) {
+    @Inject public LocalPhotoRepositoryImpl(Context context) {
         mContext = context.getApplicationContext();
     }
 
     @Override
     public List<Photo> getPhotos() {
-        return null;
+        Uri uri = PhotosContract.PhotoTable.buildPhotoUri();
+        Cursor cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+        if (cursor.getCount() == 0)
+            return null;
+        else
+            return new ArrayList<>();
     }
 
     @Override
@@ -44,4 +53,7 @@ public class LocalPhotoRepositoryImpl implements PhotoRepository {
         }
         mContext.getContentResolver().bulkInsert(uri, values);
     }
+
+    @Override
+    public void refreshPhotos() { }
 }

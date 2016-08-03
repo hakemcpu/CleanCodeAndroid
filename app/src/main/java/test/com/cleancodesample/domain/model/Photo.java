@@ -1,7 +1,7 @@
 package test.com.cleancodesample.domain.model;
 
 /**
- * Created by hzaied on 7/16/16.
+ * The main entity data holder in the application.
  */
 public class Photo {
     private String mTitle;

@@ -6,7 +6,7 @@ import test.com.cleancodesample.domain.model.Photo;
 import test.com.cleancodesample.presentation.presenter.base.Presenter;
 
 /**
- * Created by hzaied on 7/16/16.
+ * An interface that defines the actions and the callback that should be used by the presenter
  */
 public interface MainPresenter extends Presenter {
     interface View {

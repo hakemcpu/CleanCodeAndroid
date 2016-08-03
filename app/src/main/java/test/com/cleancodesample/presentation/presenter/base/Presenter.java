@@ -1,7 +1,9 @@
 package test.com.cleancodesample.presentation.presenter.base;
 
 /**
- * Created by hzaied on 7/16/16.
+ * This is an interface that defines specific actions that will be triggered from the hosting
+ * view.
+ * TODO: We can add more actions like onError or showMessage ... etc
  */
 public interface Presenter {
     void resume();

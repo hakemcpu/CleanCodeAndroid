@@ -40,8 +40,9 @@ public class ExampleUnitTest {
         Mockito.when(mPhotoRepository.getPhotos()).thenReturn(photos);
 
         GetPhotosInteractorImpl getPhotosInteractor = new GetPhotosInteractorImpl(mMainExecutor,
-                mThreadExecutor, mPhotoRepository, mCallBack);
-        getPhotosInteractor.run();
+                mThreadExecutor, mPhotoRepository);
+        getPhotosInteractor.setCallBack(mCallBack);
+        getPhotosInteractor.run(null);
 
         Mockito.verify(mPhotoRepository).getPhotos();
         Mockito.verifyNoMoreInteractions(mPhotoRepository);

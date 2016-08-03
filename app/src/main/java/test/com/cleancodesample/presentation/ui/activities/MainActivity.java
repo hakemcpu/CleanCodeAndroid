@@ -9,7 +9,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import test.com.cleancodesample.AndroidApplication;
 import test.com.cleancodesample.R;
+import test.com.cleancodesample.dagger.component.ApplicationComponent;
 import test.com.cleancodesample.presentation.ui.fragment.MainFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         FragmentManager manager = getSupportFragmentManager();

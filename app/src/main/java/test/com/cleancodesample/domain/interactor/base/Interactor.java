@@ -1,8 +1,12 @@
 package test.com.cleancodesample.domain.interactor.base;
 
 /**
- * Created by hzaied on 7/16/16.
+ * This is the main interface of an interactor. Each interactor serves a specific use case.
  */
 public interface Interactor {
+    /**
+     * This is the main method that starts an interactor. It will make sure that the interactor operation is done on a
+     * background thread.
+     */
     void execute();
 }

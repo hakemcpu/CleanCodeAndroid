@@ -1,4 +1,16 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // the latest version of the android-apt plugin
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    }
+}
 
 android {
     compileSdkVersion 23
@@ -17,14 +29,29 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        dev {
+            minSdkVersion 21
+        }
+        production {
+            minSdkVersion 16
+        }
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
+
     // tests
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.+'
+
     compile 'org.greenrobot:eventbus:3.0.0'
+
+    // Dagger
+    compile 'com.google.dagger:dagger:2.6'
+    apt "com.google.dagger:dagger-compiler:2.6"
+    provided 'javax.annotation:jsr250-api:1.0'
 }

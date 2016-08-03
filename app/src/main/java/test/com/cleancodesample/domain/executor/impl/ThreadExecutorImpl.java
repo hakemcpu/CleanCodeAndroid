@@ -9,9 +9,11 @@ import test.com.cleancodesample.domain.executor.ThreadExecutor;
 import test.com.cleancodesample.domain.interactor.base.AbstractInteractor;
 
 /**
- * Created by hzaied on 7/16/16.
+ * This singleton class will make sure that each interactor operation gets a background thread.
+ * <p/>
  */
 public class ThreadExecutorImpl implements ThreadExecutor {
+    // Singelon instance.
     private static volatile ThreadExecutor sThreadExecutor;
 
     private final static int CORE_POOL_SIZE = 3;
@@ -40,11 +42,11 @@ public class ThreadExecutorImpl implements ThreadExecutor {
     }
 
     @Override
-    public void execute(final AbstractInteractor interactor) {
+    public void execute(final AbstractInteractor interactor, final AbstractInteractor.RequestValues requestValues) {
         mThreadPoolExecutor.submit(new Runnable() {
             @Override
             public void run() {
-                interactor.run();
+                interactor.run(requestValues);
                 interactor.onFinished();
             }
         });

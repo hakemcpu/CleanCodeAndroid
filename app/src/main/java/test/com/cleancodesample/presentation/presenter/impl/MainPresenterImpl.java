@@ -2,7 +2,9 @@ package test.com.cleancodesample.presentation.presenter.impl;
 
 import java.util.List;
 
-import test.com.cleancodesample.data.PhotoRepositoryWrapper;
+import javax.inject.Inject;
+
+import test.com.cleancodesample.data.PhotoRepositoryImpl;
 import test.com.cleancodesample.domain.executor.MainExecutor;
 import test.com.cleancodesample.domain.executor.ThreadExecutor;
 import test.com.cleancodesample.domain.interactor.AddPhotosInteractor;
@@ -14,46 +16,56 @@ import test.com.cleancodesample.presentation.presenter.MainPresenter;
 import test.com.cleancodesample.presentation.presenter.base.AbstractPresenter;
 
 /**
- * Created by hzaied on 7/16/16.
+ * The main presenter of the system. It contains the interactors in the system since we only have
+ * one fragment in the activity. This is the MVP pattern.
  */
 public class MainPresenterImpl extends AbstractPresenter implements MainPresenter, AddPhotosInteractor.CallBack,
         GetPhotosInteractor.CallBack {
-    private PhotoRepositoryWrapper mPhotoRepository;
     private MainPresenter.View mView;
+    private PhotoRepositoryImpl mPhotoRepository;
+    private AddPhotosInteractorImpl mAddPhotosInteractor;
+    private GetPhotosInteractorImpl mGetPhotosInteractor;
 
-    public MainPresenterImpl(MainExecutor mainExecutor, ThreadExecutor threadExecutor,
-                             PhotoRepositoryWrapper photoRepository, View view) {
+    @Inject public MainPresenterImpl(MainExecutor mainExecutor,
+                                     ThreadExecutor threadExecutor,
+                                     PhotoRepositoryImpl photoRepository,
+                                     AddPhotosInteractorImpl addPhotosInteractor,
+                                     GetPhotosInteractorImpl getPhotosInteractor) {
         super(mainExecutor, threadExecutor);
         mPhotoRepository = photoRepository;
+        mAddPhotosInteractor = addPhotosInteractor;
+        mGetPhotosInteractor = getPhotosInteractor;
+    }
+
+    public void setView(View view) {
         mView = view;
     }
 
     @Override
     public void addPhotos(List<Photo> photos) {
-        AddPhotosInteractorImpl addPhotosInteractor = new AddPhotosInteractorImpl(mMainExecutor,
-                mThreadExecutor, mPhotoRepository.getLocalRepository(), this, photos);
-        addPhotosInteractor.execute();
+        mAddPhotosInteractor.setCallBack(this);
+        mAddPhotosInteractor.setPhotoList(photos);
+        mAddPhotosInteractor.execute();
     }
 
     @Override
     public void getPhotos() {
-        GetPhotosInteractorImpl getPhotosInteractor = new GetPhotosInteractorImpl(mMainExecutor,
-                mThreadExecutor, mPhotoRepository.getLocalRepository(), this);
-        getPhotosInteractor.execute();
+        mGetPhotosInteractor.setCallBack(this);
+        mGetPhotosInteractor.execute();
     }
 
     @Override
     public void getNetworkPhotos() {
-        GetPhotosInteractorImpl getPhotosInteractor = new GetPhotosInteractorImpl(mMainExecutor,
-                mThreadExecutor, mPhotoRepository.getRemotePhotRepository(), new GetPhotosInteractor.CallBack() {
+        mGetPhotosInteractor.setRequestValues(new GetPhotosInteractorImpl.RequestValues(true));
+        mGetPhotosInteractor.setCallBack(new GetPhotosInteractor.CallBack() {
             @Override
             public void onPhotosRetrieved(List<Photo> photos) {
-                AddPhotosInteractorImpl addPhotosInteractor = new AddPhotosInteractorImpl(mMainExecutor,
-                        mThreadExecutor, mPhotoRepository.getLocalRepository(), MainPresenterImpl.this, photos);
-                addPhotosInteractor.execute();
+                mAddPhotosInteractor.setCallBack(MainPresenterImpl.this);
+                mAddPhotosInteractor.setPhotoList(photos);
+                mAddPhotosInteractor.execute();
             }
         });
-        getPhotosInteractor.execute();
+        mGetPhotosInteractor.execute();
     }
 
     // Interactor callbacks
