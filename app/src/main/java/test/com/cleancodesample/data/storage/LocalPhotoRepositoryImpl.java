@@ -11,12 +11,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import test.com.cleancodesample.data.storage.converter.StorageModelConverter;
+import test.com.cleancodesample.data.storage.database.PhotosDatabaseHandler;
 import test.com.cleancodesample.data.storage.model.PhotosContract;
 import test.com.cleancodesample.domain.model.Photo;
 import test.com.cleancodesample.domain.repository.PhotoRepository;
 
 /**
- * Created by hzaied on 7/16/16.
+ * The implementation of the Local database repository for the photos.
  */
 public class LocalPhotoRepositoryImpl implements PhotoRepository {
 
@@ -30,10 +31,28 @@ public class LocalPhotoRepositoryImpl implements PhotoRepository {
     public List<Photo> getPhotos() {
         Uri uri = PhotosContract.PhotoTable.buildPhotoUri();
         Cursor cursor = mContext.getContentResolver().query(uri, null, null, null, null);
-        if (cursor.getCount() == 0)
+        if (cursor == null || cursor.getCount() == 0)
             return null;
-        else
-            return new ArrayList<>();
+        else {
+            List<Photo> photos = new ArrayList<>();
+
+            PhotosDatabaseHandler.PhotosCursorWrapper photosCursorWrapper = null;
+            try {
+                photosCursorWrapper = new PhotosDatabaseHandler.PhotosCursorWrapper(cursor);
+                // Use the cursor wrapper to get the Storage entity right away.
+                photosCursorWrapper.moveToFirst();
+                while (!photosCursorWrapper.isAfterLast()) {
+                    Photo photo = StorageModelConverter.convertToDomainModel(photosCursorWrapper.getPhoto());
+                    photos.add(photo);
+                    photosCursorWrapper.moveToNext();
+                }
+            } finally {
+                if(photosCursorWrapper != null)
+                    photosCursorWrapper.close();
+            }
+
+            return photos;
+        }
     }
 
     @Override

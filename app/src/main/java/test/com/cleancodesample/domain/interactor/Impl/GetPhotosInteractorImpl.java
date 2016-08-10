@@ -39,6 +39,7 @@ public class GetPhotosInteractorImpl extends AbstractInteractor<GetPhotosInterac
         if (requestValues != null && requestValues.isForceUpdate())
             mPhotoRepository.refreshPhotos();
 
+        // TODO: Add different error reporting here ex: network problems.
         final List<Photo> photos = mPhotoRepository.getPhotos();
         mMainExecutor.post(new Runnable() {
             @Override

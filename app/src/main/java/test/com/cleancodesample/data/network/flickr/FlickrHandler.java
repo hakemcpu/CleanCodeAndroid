@@ -46,11 +46,12 @@ public class FlickrHandler {
     }
 
     public List<Photo> fetchItems() {
-        final String URL = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=5f412b6f21aa9b6978c979c1ca806375&format=json&nojsoncallback=1";
+        final String URL = "https://api.flickr.com/services/rest/?&method=flickr.photos.getRecent&api_key=5f412b6f21aa9b6978c979c1ca806375&format=json&nojsoncallback=1";
         try {
             List<Photo> photos = parsePhotos(getString(URL));
 
-            // NOTE: Just for the sake of using Eventbus, we already have a callback mechanism.
+            // NOTE: The line below is just for the sake of using Eventbus,
+            // we already have a callback mechanism.
             EventBus.getDefault().post("Finished updating the data");
 
             return photos;

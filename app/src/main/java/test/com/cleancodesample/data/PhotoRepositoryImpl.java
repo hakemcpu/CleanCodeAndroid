@@ -27,18 +27,20 @@ public class PhotoRepositoryImpl implements PhotoRepository {
 
     @Override
     public List<Photo> getPhotos() {
-        if(mIsDirty) {
-            mIsDirty = false;
-            return mRemotePhotoRepository.getPhotos();
-        } else {
-            // TODO: This part is not working as request - updating in the first run-
-            // because of the cursor loader. Where we need to add the photos to the database
-            // after retrieving them at the Presenter level. This is not done at the moment.
+        // If the request is not dirty then we get the data from the local database
+        // In case of not having data in the local database, we will retrieve the data from the
+        // remote repository and save it to the databse.
+        if(!mIsDirty) {
             List<Photo> photoList = mLocalPhotoRepository.getPhotos();
             if (photoList != null)
                 return photoList;
-            else return mRemotePhotoRepository.getPhotos();
         }
+
+        mIsDirty = false;
+        // Retrieve from the network and the add the photos.
+        List<Photo> photos = mRemotePhotoRepository.getPhotos();
+        mLocalPhotoRepository.addPhotos(photos);
+        return photos;
     }
 
     @Override

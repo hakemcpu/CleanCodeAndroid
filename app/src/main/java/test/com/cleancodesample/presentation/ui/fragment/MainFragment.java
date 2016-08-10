@@ -21,33 +21,28 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import test.com.cleancodesample.AndroidApplication;
 import test.com.cleancodesample.R;
 import test.com.cleancodesample.dagger.component.ApplicationComponent;
-import test.com.cleancodesample.dagger.component.DaggerApplicationComponent;
 import test.com.cleancodesample.dagger.component.DaggerPhotoComponent;
 import test.com.cleancodesample.dagger.component.PhotoComponent;
-import test.com.cleancodesample.data.PhotoRepositoryImpl;
-import test.com.cleancodesample.data.network.RemotePhotoRepositoryImpl;
 import test.com.cleancodesample.data.network.imageloader.ThreadPoolImageLoader;
-import test.com.cleancodesample.data.storage.LocalPhotoRepositoryImpl;
-import test.com.cleancodesample.data.storage.model.PhotosContract;
-import test.com.cleancodesample.domain.executor.impl.ThreadExecutorImpl;
+import test.com.cleancodesample.domain.model.Photo;
 import test.com.cleancodesample.presentation.presenter.MainPresenter;
 import test.com.cleancodesample.presentation.presenter.impl.MainPresenterImpl;
-import test.com.cleancodesample.presentation.ui.customviews.CursorRecyclerViewAdapter;
-import test.com.cleancodesample.thread.MainExecutorImpl;
+import test.com.cleancodesample.presentation.ui.customviews.FlickrAdapter;
 
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,MainPresenter.View {
-    private final static int QUERY_LOADER_ID = 10;
+public class MainFragment extends Fragment implements MainPresenter.View {
+//    private final static int QUERY_LOADER_ID = 10;
 
     // Views
     private RecyclerView mRecyclerView;
-    private ImageAdapter mAdapter;
-    private ThreadPoolImageLoader<ViewHolder> mImageLoader;
+    private FlickrAdapter mAdapter;
+    private ThreadPoolImageLoader<FlickrAdapter.ViewHolder> mImageLoader;
 
     // This has to be public for Dagger to be able to inject it.
     public @Inject MainPresenterImpl mMainPresenter;
@@ -61,12 +56,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mImageLoader = new ThreadPoolImageLoader<>(new ThreadPoolImageLoader.OnDownloadListener<ViewHolder>() {
+        mImageLoader = new ThreadPoolImageLoader<>(new ThreadPoolImageLoader.OnDownloadListener<FlickrAdapter.ViewHolder>() {
             @Override
-            public void onImageDownloaded(ViewHolder target, String url, Bitmap bitmap) {
+            public void onImageDownloaded(FlickrAdapter.ViewHolder target, String url, Bitmap bitmap) {
                 Log.e("test", "Image Downloaded");
                 if(getActivity() != null) {
-                    if (url.equals(target.mImageView.getTag())) {
+                    if (url.equals(target.getTag())) {
                         Drawable drawable = new BitmapDrawable(getResources(), bitmap);
                         target.bindDrawable(drawable);
                     }
@@ -102,7 +97,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mAdapter = new ImageAdapter(null, mImageLoader);
+        mAdapter = new FlickrAdapter(null, mImageLoader);
         mRecyclerView.setAdapter(mAdapter);
 
         Button button = (Button) view.findViewById(R.id.update_button);
@@ -122,33 +117,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(QUERY_LOADER_ID, null, this);
         mMainPresenter.getPhotos();
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
-        if (loaderId == QUERY_LOADER_ID) {
-            Uri uri = PhotosContract.PhotoTable.buildPhotoUri();
-            return new CursorLoader(getActivity(), uri, null, null, null, null);
-        }
-        return null;
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        int id = loader.getId();
-        if (id == QUERY_LOADER_ID) {
-            mAdapter.swapCursor(null);
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        int id = loader.getId();
-        if (id == QUERY_LOADER_ID) {
-            mAdapter.swapCursor(cursor);
-        }
     }
 
     @Override
@@ -158,53 +127,11 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onPhotosAdded() {
-        // The cursor will updated automatically.
+        // Do nothing.
     }
 
     @Override
-    public void onPhotosRetrieved() {
-        // Do nothing the cursor loader will handle every thing.
-    }
-
-    static class ImageAdapter extends CursorRecyclerViewAdapter<ViewHolder> {
-        private WeakReference<ThreadPoolImageLoader<ViewHolder>> mImageLoaderWeakReference;
-
-        public ImageAdapter(Cursor cursor, ThreadPoolImageLoader<ViewHolder> imageLoader) {
-            super(cursor);
-            mImageLoaderWeakReference = new WeakReference<>(imageLoader);
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, Cursor cursor) {
-            String url = cursor.getString(cursor.getColumnIndex(PhotosContract.PhotoTable.COL_URL));
-            holder.bindDrawable(holder.mImageView.getResources().getDrawable(R.mipmap.ic_launcher));
-            ThreadPoolImageLoader<ViewHolder> imageLoader = mImageLoaderWeakReference.get();
-            if(imageLoader != null)
-                imageLoader.queueImage(holder, url);
-            holder.mImageView.setTag(url);
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return super.getItemViewType(position);
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
-            return new ViewHolder(view);
-        }
-    }
-
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView mImageView;
-        public ViewHolder(View view) {
-            super(view);
-            mImageView = (ImageView)view;
-        }
-
-        public void bindDrawable(Drawable d) {
-            mImageView.setImageDrawable(d);
-        }
+    public void onPhotosRetrieved(List<Photo> photos) {
+        mAdapter.setPhotoList(photos);
     }
 }

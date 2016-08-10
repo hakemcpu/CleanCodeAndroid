@@ -20,6 +20,9 @@ import test.com.cleancodesample.presentation.ui.fragment.MainFragment;
 public interface ApplicationComponent {
     /**
      * This is the injection function. It provides the injector object to the interface.
+     * Note: The inject function should take the Instance that contains the @Inject annotation in it
+     * So we will not be able to pass a generic type to this function unless the generic type
+     * contains @Inject annotation.
      * TODO: We need to create a base fragment, or we can have multiple inject functions for each fragment.
      */
     void inject(MainFragment fragment);

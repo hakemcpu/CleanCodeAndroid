@@ -57,14 +57,7 @@ public class MainPresenterImpl extends AbstractPresenter implements MainPresente
     @Override
     public void getNetworkPhotos() {
         mGetPhotosInteractor.setRequestValues(new GetPhotosInteractorImpl.RequestValues(true));
-        mGetPhotosInteractor.setCallBack(new GetPhotosInteractor.CallBack() {
-            @Override
-            public void onPhotosRetrieved(List<Photo> photos) {
-                mAddPhotosInteractor.setCallBack(MainPresenterImpl.this);
-                mAddPhotosInteractor.setPhotoList(photos);
-                mAddPhotosInteractor.execute();
-            }
-        });
+        mGetPhotosInteractor.setCallBack(this);
         mGetPhotosInteractor.execute();
     }
 
@@ -75,7 +68,7 @@ public class MainPresenterImpl extends AbstractPresenter implements MainPresente
     }
     @Override
     public void onPhotosRetrieved(List<Photo> photos) {
-        mView.onPhotosRetrieved();
+        mView.onPhotosRetrieved(photos);
     }
 
     // Presenters interfaces.

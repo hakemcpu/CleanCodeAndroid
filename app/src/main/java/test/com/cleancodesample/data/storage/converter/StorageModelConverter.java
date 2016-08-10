@@ -26,8 +26,9 @@ public class StorageModelConverter {
             modelPhotos.add(convertToStorageModel(photo));
         }
 
-        photos.clear();
-        photos = null;
+        // TODO: NEED TO CHECK THE BELOW CODE
+//        photos.clear();
+//        photos = null;
 
         return modelPhotos;
     }
@@ -38,8 +39,9 @@ public class StorageModelConverter {
             domainPhotos.add(convertToDomainModel(photo));
         }
 
-        photos.clear();
-        photos = null;
+        // TODO: NEED TO CHECK THE BELOW CODE
+//        photos.clear();
+//        photos = null;
 
         return domainPhotos;
     }

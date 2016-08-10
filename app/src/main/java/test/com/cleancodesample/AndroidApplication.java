@@ -15,8 +15,8 @@ public class AndroidApplication extends Application {
            ———>	|  ———  Interactor        |       ———> |	   Network	      	     |
           |	    | |			              |      |     |	    - Rest Apis	         |
           |	    |  ———> Executor          |      |     |                             |
-          |	    |	      Repository ———— | ————————>  |	   Storage  	   	     |
-          |	    |	      Model           |            |	    - Content Providers  |
+          |	    |	    Repository   ———— | ————————>  |	   Storage  	   	     |
+          |	    |	    Model             |            |	    - Content Providers  |
           |	    |			              |            |	    - Database	         |
           |	      ———————————————————————               —————————————————————————————
           |

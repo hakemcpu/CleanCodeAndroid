@@ -11,7 +11,7 @@ import test.com.cleancodesample.presentation.presenter.base.Presenter;
 public interface MainPresenter extends Presenter {
     interface View {
         void onPhotosAdded();
-        void onPhotosRetrieved();
+        void onPhotosRetrieved(List<Photo> photos);
     }
 
     void addPhotos(List<Photo> photos);

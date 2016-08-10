@@ -64,7 +64,7 @@ public class PhotosDatabaseHandler extends DatabaseHelper.DatabaseHandler {
             long id = getLong(getColumnIndex(PhotosContract.PhotoTable.COL_ID));
             String url = getString(getColumnIndex(PhotosContract.PhotoTable.COL_URL));
             String title = getString(getColumnIndex(PhotosContract.PhotoTable.COL_TITLE));
-            return new Photo(id, url, title);
+            return new Photo(id, title, url);
         }
     }
 
